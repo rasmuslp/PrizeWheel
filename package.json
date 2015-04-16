@@ -1,0 +1,24 @@
+{
+  "name": "PrizeWheel",
+  "version": "0.1.0",
+  "description": "A customisable prize wheel",
+  "contributers": [
+    {
+      "name": "Rasmus Ljungmann Pedersen",
+      "email": "rasmuslp@gmail.com"
+    }
+  ],
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rasmuslp/PrizeWheel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rasmuslp/PrizeWheel/issues"
+  },
+  "homepage": "https://github.com/rasmuslp/PrizeWheel",
+  "devDependencies": {
+    "browser-sync": "^2.6.4",
+    "gulp": "^3.8.11"
+  }
+}

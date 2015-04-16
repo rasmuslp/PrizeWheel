@@ -1,0 +1,11 @@
+var data = [
+  {
+    text: 'Winner!'
+  },
+  {
+    text: 'Looser!'
+  },
+  {
+    text: 'In between'
+  }
+  ];
