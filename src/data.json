@@ -1,11 +1,1 @@
-var data = [
-  {
-    text: 'Winner!'
-  },
-  {
-    text: 'Looser!'
-  },
-  {
-    text: 'In between'
-  }
-  ];
+var data = ['Winner!', 'Looser!', 'In between', 'Sup?'];
