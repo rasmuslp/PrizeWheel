@@ -18,6 +18,9 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.lineWidth = 2;
+    ctx.font = 'bold 42px Helvetica, Arial';
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'middle';
 
     var arrowHeight = 30;
     var size = canvas.width;
@@ -31,21 +34,38 @@
     var i;
     var angle;
 
-    // Slice fill
+    // numberOfSlices = 1;
+
+    // Slice fill and text
     for (i = 0; i < numberOfSlices; i++) {
       angle = currentAngle + i * sliceArc;
+
+      // Fill
       ctx.beginPath();
       ctx.arc(cX, cY, outsideRadius, angle, angle + sliceArc, false);
       ctx.arc(cX, cY, insideRadius, angle + sliceArc, angle, true);
 
       ctx.fillStyle = slices[i].color;
       ctx.fill();
+
+      // Text
+      ctx.save();
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = 'white';
+      ctx.fillStyle = 'black';
+      var textAngle = angle + sliceArc/2;
+
+      ctx.translate(cX, cY);
+      ctx.rotate(textAngle);
+      var text = slices[i].text;
+      var textWidth = ctx.measureText(text).width;
+      ctx.fillText(text, outsideRadius - 25 - textWidth, 0);
+      ctx.restore();
     }
 
     // Slice outlines
     for (i = 0; i < numberOfSlices; i++) {
       angle = currentAngle + i * sliceArc;
-      ctx.fillStyle = 'black';
       ctx.beginPath();
       ctx.arc(cX, cY, outsideRadius, angle, angle + sliceArc, false);
       ctx.arc(cX, cY, insideRadius, angle + sliceArc, angle, true);
