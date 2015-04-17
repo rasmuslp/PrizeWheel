@@ -1,6 +1,8 @@
 (function() {
   'use strict';
 
+  var spinning = false;
+
   var slices = [];
   var numberOfSlices;
   var sliceArc;
@@ -62,6 +64,34 @@
     ctx.lineTo(cX - 5, 20);
     ctx.lineTo(cX - 5, 0);
     ctx.fill();
+
+    // Queue draw
+    window.requestAnimationFrame(draw);
+  };
+
+  var startWheel = function() {
+    spinning = true;
+    console.log('Starting wheel');
+    rotateWheel();
+  };
+
+  var rotateWheel = function() {
+    if (!spinning) {
+      return;
+    }
+
+    var inc = 2;
+    currentAngle += (inc * Math.PI) / 180;
+    if (currentAngle > (2 * Math.PI)) {
+      currentAngle -= 2 * Math.PI;
+    }
+
+    setTimeout(rotateWheel, 10);
+  };
+
+  var stopWheel = function() {
+    console.log('Stopping wheel');
+    spinning = false;
   };
 
   $(document).ready(function() {
@@ -93,7 +123,18 @@
 
     console.log('Data is now: %o', slices);
 
-    draw();
+    // Queue draw
+    window.requestAnimationFrame(draw);
   });
+
+  document.onkeypress = function(e) {
+    if (e.keyCode === 32) {
+      if (!spinning) {
+        startWheel();
+      } else {
+        stopWheel();
+      }
+    }
+  };
 
 })();
