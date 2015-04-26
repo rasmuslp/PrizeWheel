@@ -5,9 +5,23 @@
 
   var slices = [];
   var numberOfSlices;
-  var sliceArc;
-  var currentAngle = 0;
 
+  // Static drawing information
+  var size;
+
+  var sliceArc;
+
+  var arrowHeight;
+  var outsideRadius;
+  var insideRadius;
+
+  var cX;
+  var cY;
+
+  // Dynamic drawing information
+  var currentAngle = 0;
+  
+  // Physics
   var spinningSpeed = 180;
   var timestamp;
   var lastTimestamp;
@@ -22,53 +36,38 @@
 
   var drawStepInterval = 1;
 
-  var draw1 = function() {
+  var drawDriver = function() {
     if (bufferReady) {
-      setTimeout(draw1, drawStepInterval);
+      setTimeout(drawDriver, drawStepInterval);
     } else {
-      // Calculate rotation
-      timestamp = Date.now();
-      if (spinning) {
-        if (lastTimestamp !== undefined) {
-          var diff = timestamp - lastTimestamp;
-          var inc = spinningSpeed * diff / 1000;
-          currentAngle += (inc * Math.PI) / 180;
-          if (currentAngle > (2 * Math.PI)) {
-            currentAngle -= 2 * Math.PI;
-          }
-        }
-      }
-      lastTimestamp = timestamp;
-
-      setTimeout(draw2, drawStepInterval);
+      setTimeout(calcPhysics, drawStepInterval);
     }
   };
 
-  var draw2 = function() {
-    // Draw rotation
+  var calcPhysics = function() {
+    timestamp = Date.now();
+    if (spinning) {
+      if (lastTimestamp !== undefined) {
+        var diff = timestamp - lastTimestamp;
+        var inc = spinningSpeed * diff / 1000;
+        currentAngle += (inc * Math.PI) / 180;
+        if (currentAngle > (2 * Math.PI)) {
+          currentAngle -= 2 * Math.PI;
+        }
+      }
+    }
+    lastTimestamp = timestamp;
+
+    setTimeout(drawSliceFill, drawStepInterval);
+  };
+
+  var drawSliceFill = function() {
     var ctx = bufferContext;
     ctx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
-    ctx.lineWidth = 2;
-    ctx.font = 'bold 42px Helvetica, Arial';
-    ctx.textAlign = 'start';
-    ctx.textBaseline = 'middle';
 
-    var arrowHeight = 30;
-    var size = wheelCanvas.width;
-
-    var outsideRadius = (size-arrowHeight)/2 - 5;
-    var insideRadius = 20;
-
-    var cX = size/2;
-    var cY = outsideRadius + arrowHeight + 2;
-
-    var i;
     var angle;
 
-    // numberOfSlices = 1;
-
-    // Slice fill and text
-    for (i = 0; i < numberOfSlices; i++) {
+    for (var i = 0; i < numberOfSlices; i++) {
       angle = currentAngle + i * sliceArc;
 
       // Fill
@@ -78,40 +77,40 @@
 
       ctx.fillStyle = slices[i].color;
       ctx.fill();
+    }
 
-      // Text
-      ctx.save();
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = 'white';
-      ctx.fillStyle = 'white';
-      var textAngle = angle + sliceArc/2;
+    setTimeout(drawSliceText, drawStepInterval);
+  };
 
-      ctx.translate(cX, cY);
-      ctx.rotate(textAngle);
+  var drawSliceText = function() {
+    var ctx = bufferContext;
+
+    ctx.save();
+
+    ctx.fillStyle = 'white';
+    ctx.translate(cX, cY);
+
+    ctx.rotate(currentAngle + sliceArc/2);
+
+    for (var i = 0; i < numberOfSlices; i++) {
       var text = slices[i].text;
       var textWidth = ctx.measureText(text).width;
       ctx.fillText(text, outsideRadius - 25 - textWidth, 0);
-      ctx.restore();
+
+      ctx.rotate(sliceArc);
     }
 
-    setTimeout(draw3, drawStepInterval);
+    ctx.restore();
+
+    setTimeout(drawSliceStroke, drawStepInterval);
   };
 
-  var draw3 = function() {
+  var drawSliceStroke = function() {
     var ctx = bufferContext;
-    var arrowHeight = 30;
-    var size = wheelCanvas.width;
 
-    var outsideRadius = (size-arrowHeight)/2 - 5;
-    var insideRadius = 20;
-
-    var cX = size/2;
-    var cY = outsideRadius + arrowHeight + 2;
-
-    var i;
     var angle;
     // Slice outlines
-    for (i = 0; i < numberOfSlices; i++) {
+    for (var i = 0; i < numberOfSlices; i++) {
       angle = currentAngle + i * sliceArc;
       ctx.beginPath();
       ctx.arc(cX, cY, outsideRadius, angle, angle + sliceArc, false);
@@ -119,7 +118,15 @@
       ctx.stroke();
     }
 
-    // Arrow
+    setTimeout(drawArrow, drawStepInterval);
+  };
+
+  var drawArrow = function() {
+    var ctx = bufferContext;
+
+    var size = wheelCanvas.width;
+    var cX = size/2;
+
     ctx.fillStyle = 'black';
     ctx.beginPath();
     ctx.moveTo(cX - 5, 0);
@@ -132,22 +139,22 @@
     ctx.lineTo(cX - 5, 0);
     ctx.fill();
 
-    setTimeout(draw, drawStepInterval);
     bufferReady = true;
+    setTimeout(draw, drawStepInterval);
   };
 
   var draw = function() {
-    draw1();
+    drawDriver();
   };
 
   var nonreadyBuffers = 0;
 
   var render = function() {
     if (bufferReady) {
-      wheelContext.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+      wheelContext.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height); //TODO: Potential hog
       wheelContext.drawImage(bufferCanvas, 0, 0);
       bufferReady = false;
-      setTimeout(render, 7);
+      setTimeout(render, 5);
     } else {
       nonreadyBuffers++;
       if(nonreadyBuffers < 5 || nonreadyBuffers % 20 === 0) {
@@ -187,11 +194,10 @@
     /* jshint +W117 */
 
     numberOfSlices = slices.length;
-    sliceArc = Math.PI * 2 / numberOfSlices;
 
     var colorSeparation = 360 / numberOfSlices;
     for (i = 0; i < numberOfSlices; i++) {
-      slices[i].color = 'hsl(' + i * ( colorSeparation ) + ', 100%, 50%)';
+      slices[i].color = 'hsl(' + i * (colorSeparation) + ', 100%, 50%)';
     }
 
     console.log('Data is now: %o', slices);
@@ -204,6 +210,22 @@
     bufferCanvas.width = wheelCanvas.width;
     bufferCanvas.height = wheelCanvas.height;
     bufferContext = bufferCanvas.getContext('2d');
+    bufferContext.lineWidth = 2;
+    bufferContext.font = 'bold 42px Helvetica, Arial';
+    bufferContext.textAlign = 'start';
+    bufferContext.textBaseline = 'middle';
+
+    // Calculate drawing information
+    size = wheelCanvas.width;
+
+    sliceArc = Math.PI * 2 / numberOfSlices;
+
+    arrowHeight = 30;
+    outsideRadius = (size - arrowHeight)/2 - 5;
+    insideRadius = 20;
+
+    cX = size/2;
+    cY = outsideRadius + arrowHeight + 2;
 
     if (typeof wheelCanvas.getContext === 'undefined') {
       console.error('Canvas not supported by this browser');
