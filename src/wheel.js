@@ -1,7 +1,16 @@
 (function() {
   'use strict';
 
-  var spinning = false;
+  var easing = {
+    linearTween: function (t, b, c, d) {
+      return c*t/d + b;
+    },
+
+    easeOutQuad: function (t, b, c, d) {
+      t /= d;
+      return -c * t*(t-2) + b;
+    }
+  };
 
   var slices = [];
   var numberOfSlices;
@@ -20,9 +29,15 @@
 
   // Dynamic drawing information
   var currentAngle = 0;
-  
+
   // Physics
-  var spinningSpeed = 180;
+  var accTime = 2500;
+  var deaccTime = 5000;
+  var rotateSpeed = 140;
+  var speed = 0;
+  var targetSpeed = 0;
+  var speedChangeTs;
+
   var timestamp;
   var lastTimestamp;
 
@@ -46,16 +61,33 @@
 
   var calcPhysics = function() {
     timestamp = Date.now();
-    if (spinning) {
-      if (lastTimestamp !== undefined) {
-        var diff = timestamp - lastTimestamp;
-        var inc = spinningSpeed * diff / 1000;
-        currentAngle += (inc * Math.PI) / 180;
-        if (currentAngle > (2 * Math.PI)) {
-          currentAngle -= 2 * Math.PI;
-        }
+
+    var changeDiff = timestamp - speedChangeTs;
+
+    if (speed < targetSpeed) {
+      // Accelerate
+      if (changeDiff > accTime) {
+        changeDiff = accTime;
+      }
+      speed = easing.linearTween(changeDiff, 0, rotateSpeed, 2500);
+    } else if (speed > targetSpeed) {
+      // Deccelerate
+      if (changeDiff > deaccTime) {
+        changeDiff = deaccTime;
+      }
+      speed = easing.easeOutQuad(changeDiff, rotateSpeed, -rotateSpeed, 5000);
+    }
+
+    // Rotate
+    if (lastTimestamp !== undefined) {
+      var diff = timestamp - lastTimestamp;
+      var inc = speed * diff / 1000;
+      currentAngle += (inc * Math.PI) / 180;
+      if (currentAngle > (2 * Math.PI)) {
+        currentAngle -= 2 * Math.PI;
       }
     }
+
     lastTimestamp = timestamp;
 
     setTimeout(drawSliceFill, drawStepInterval);
@@ -165,13 +197,15 @@
   };
 
   var startWheel = function() {
-    spinning = true;
     console.log('Starting wheel');
+    targetSpeed = rotateSpeed;
+    speedChangeTs = Date.now();
   };
 
   var stopWheel = function() {
     console.log('Stopping wheel');
-    spinning = false;
+    targetSpeed = 0;
+    speedChangeTs = Date.now();
   };
 
   $(document).ready(function() {
@@ -236,9 +270,9 @@
 
       $('body').keyup(function(e){
         if(e.keyCode === 32){
-          if (!spinning) {
+          if (speed === 0) {
             startWheel();
-          } else {
+          } else if (speed === rotateSpeed) {
             stopWheel();
           }
         }
