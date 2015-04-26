@@ -8,10 +8,9 @@
   var sliceArc;
   var currentAngle = 0;
 
-  var drawInterval = 10;
-  var spinningSpeed = 90;
+  var spinningSpeed = 180;
   var timestamp;
-  var lastTimetamp;
+  var lastTimestamp;
 
   var wheelCanvas;
   var wheelContext;
@@ -23,14 +22,15 @@
 
   var drawStepInterval = 1;
 
-  var draw1 = function( ) {
-    if( bufferReady ) {
+  var draw1 = function() {
+    if (bufferReady) {
       setTimeout(draw1, drawStepInterval);
-    } else { // Calculate rotation
+    } else {
+      // Calculate rotation
       timestamp = Date.now();
       if (spinning) {
-        if (lastTimetamp !== undefined) {
-          var diff = timestamp - lastTimetamp;
+        if (lastTimestamp !== undefined) {
+          var diff = timestamp - lastTimestamp;
           var inc = spinningSpeed * diff / 1000;
           currentAngle += (inc * Math.PI) / 180;
           if (currentAngle > (2 * Math.PI)) {
@@ -38,18 +38,16 @@
           }
         }
       }
-      lastTimetamp = timestamp;
+      lastTimestamp = timestamp;
 
       setTimeout(draw2, drawStepInterval);
     }
-
   };
 
   var draw2 = function() {
-    var ctx = bufferContext;
     // Draw rotation
+    var ctx = bufferContext;
     ctx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
-
     ctx.lineWidth = 2;
     ctx.font = 'bold 42px Helvetica, Arial';
     ctx.textAlign = 'start';
@@ -96,7 +94,6 @@
       ctx.restore();
     }
 
-
     setTimeout(draw3, drawStepInterval);
   };
 
@@ -140,23 +137,21 @@
   };
 
   var draw = function() {
-    draw1( bufferCanvas.getContext('2d') );
-
-    // setTimeout(draw, drawInterval);
+    draw1();
   };
 
   var nonreadyBuffers = 0;
 
   var render = function() {
-    if( bufferReady ) {
+    if (bufferReady) {
       wheelContext.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
       wheelContext.drawImage(bufferCanvas, 0, 0);
       bufferReady = false;
       setTimeout(render, 7);
     } else {
       nonreadyBuffers++;
-      if( nonreadyBuffers < 5 || nonreadyBuffers % 20 == 0 ) {
-        console.log('nonreadyBuffers' + nonreadyBuffers );
+      if(nonreadyBuffers < 5 || nonreadyBuffers % 20 === 0) {
+        console.log('nonreadyBuffers' + nonreadyBuffers);
       }
       window.requestAnimationFrame(render);
     }
@@ -165,20 +160,6 @@
   var startWheel = function() {
     spinning = true;
     console.log('Starting wheel');
-  };
-
-  var rotateWheel = function() {
-    if (!spinning) {
-      return;
-    }
-
-    var inc = 2;
-    currentAngle += (inc * Math.PI) / 180;
-    if (currentAngle > (2 * Math.PI)) {
-      currentAngle -= 2 * Math.PI;
-    }
-
-    setTimeout(rotateWheel, 10);
   };
 
   var stopWheel = function() {
@@ -229,7 +210,6 @@
     } else {
       // Queue draw
       draw();
-      setTimeout(draw, drawInterval);
       window.requestAnimationFrame(render);
 
       $('body').keyup(function(e){
