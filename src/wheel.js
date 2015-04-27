@@ -29,10 +29,10 @@
     },
 
     easeInOutQuart: function (t, b, c, d) {
-    	t /= d/2;
-    	if (t < 1) return c/2*t*t*t*t + b;
-    	t -= 2;
-    	return -c/2 * (t*t*t*t - 2) + b;
+      t /= d/2;
+      if (t < 1) return c/2*t*t*t*t + b;
+      t -= 2;
+      return -c/2 * (t*t*t*t - 2) + b;
     },
 
     easeOutQuint: function (t, b, c, d) {
@@ -76,7 +76,8 @@
 
   // Physics
   var accTime = 2500;
-  var deaccTime = 8000;
+  var deaccTime = 7000;
+  var deaccTimeRandom;
   var rotateSpeed = 140;
   var speed = 0;
   var targetSpeed = 0;
@@ -120,12 +121,12 @@
       // console.log('Accelerating with ' + speed);
     } else if (speed > targetSpeed) {
       // Deccelerate
-      if (changeDiff > deaccTime) {
+      if (changeDiff > (deaccTime + deaccTimeRandom)) {
         // Should reach end point now
         speed = 0;
       } else {
         // Continue deaccelerating
-        speed = easing.easeOutCirc(changeDiff, rotateSpeed, -rotateSpeed, deaccTime);
+        speed = easing.easeOutCirc(changeDiff, rotateSpeed, -rotateSpeed, (deaccTime + deaccTimeRandom));
       }
       // console.log('Deaccelerating with ' + speed);
     }
@@ -259,7 +260,8 @@
   var stopWheel = function() {
     console.log('Stopping wheel');
     targetSpeed = 0;
-    speedChangeTs = Date.now(); //TODO: Add random time
+    deaccTimeRandom = Math.floor(Math.random() * (4000 + 1));
+    speedChangeTs = Date.now();
   };
 
   $(document).ready(function() {
