@@ -6,9 +6,46 @@
       return c*t/d + b;
     },
 
+    easeInQuart: function (t, b, c, d) {
+      t /= d;
+      return c*t*t*t*t + b;
+    },
+
     easeOutQuad: function (t, b, c, d) {
       t /= d;
       return -c * t*(t-2) + b;
+    },
+
+    easeOutCubic: function (t, b, c, d) {
+      t /= d;
+      t--;
+      return c*(t*t*t + 1) + b;
+    },
+
+    easeOutQuart: function (t, b, c, d) {
+      t /= d;
+      t--;
+      return -c * (t*t*t*t - 1) + b;
+    },
+
+    easeOutQuint: function (t, b, c, d) {
+      t /= d;
+      t--;
+      return c*(t*t*t*t*t + 1) + b;
+    },
+
+    easeOutSine: function (t, b, c, d) {
+      return c * Math.sin(t/d * (Math.PI/2)) + b;
+    },
+
+    easeOutExpo: function (t, b, c, d) {
+      return c * ( -Math.pow( 2, -10 * t/d ) + 1 ) + b;
+    },
+
+    easeOutCirc: function (t, b, c, d) {
+      t /= d;
+      t--;
+      return c * Math.sqrt(1 - t*t) + b;
     }
   };
 
@@ -69,13 +106,15 @@
       if (changeDiff > accTime) {
         changeDiff = accTime;
       }
-      speed = easing.linearTween(changeDiff, 0, rotateSpeed, 2500);
+      speed = easing.easeInQuart(changeDiff, 0, rotateSpeed, 2500);
+      console.log('Accelerating with ' + speed);
     } else if (speed > targetSpeed) {
       // Deccelerate
       if (changeDiff > deaccTime) {
         changeDiff = deaccTime;
       }
-      speed = easing.easeOutQuad(changeDiff, rotateSpeed, -rotateSpeed, 5000);
+      speed = easing.easeOutCirc(changeDiff, rotateSpeed, -rotateSpeed, 5000);
+      console.log('Deaccelerating with ' + speed);
     }
 
     // Rotate
@@ -140,6 +179,8 @@
   var drawSliceStroke = function() {
     var ctx = bufferContext;
 
+    ctx.strokeStyle = 'white';
+
     var angle;
     // Slice outlines
     for (var i = 0; i < numberOfSlices; i++) {
@@ -159,7 +200,7 @@
     var size = wheelCanvas.width;
     var cX = size/2;
 
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'white';
     ctx.beginPath();
     ctx.moveTo(cX - 5, 0);
     ctx.lineTo(cX + 5, 0);
@@ -205,7 +246,7 @@
   var stopWheel = function() {
     console.log('Stopping wheel');
     targetSpeed = 0;
-    speedChangeTs = Date.now();
+    speedChangeTs = Date.now(); //TODO: Add random time
   };
 
   $(document).ready(function() {
@@ -245,7 +286,7 @@
     bufferCanvas.height = wheelCanvas.height;
     bufferContext = bufferCanvas.getContext('2d');
     bufferContext.lineWidth = 2;
-    bufferContext.font = 'bold 42px Helvetica, Arial';
+    bufferContext.font = '42px Helvetica, Arial';
     bufferContext.textAlign = 'start';
     bufferContext.textBaseline = 'middle';
 
