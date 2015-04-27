@@ -28,6 +28,13 @@
       return -c * (t*t*t*t - 1) + b;
     },
 
+    easeInOutQuart: function (t, b, c, d) {
+    	t /= d/2;
+    	if (t < 1) return c/2*t*t*t*t + b;
+    	t -= 2;
+    	return -c/2 * (t*t*t*t - 2) + b;
+    },
+
     easeOutQuint: function (t, b, c, d) {
       t /= d;
       t--;
@@ -69,7 +76,7 @@
 
   // Physics
   var accTime = 2500;
-  var deaccTime = 5000;
+  var deaccTime = 8000;
   var rotateSpeed = 140;
   var speed = 0;
   var targetSpeed = 0;
@@ -104,17 +111,23 @@
     if (speed < targetSpeed) {
       // Accelerate
       if (changeDiff > accTime) {
-        changeDiff = accTime;
+        // Should reach end point now
+        speed = rotateSpeed;
+      } else {
+        // Continue accelerating
+        speed = easing.easeInOutQuart(changeDiff, 0, rotateSpeed, accTime);
       }
-      speed = easing.easeInQuart(changeDiff, 0, rotateSpeed, 2500);
-      console.log('Accelerating with ' + speed);
+      // console.log('Accelerating with ' + speed);
     } else if (speed > targetSpeed) {
       // Deccelerate
       if (changeDiff > deaccTime) {
-        changeDiff = deaccTime;
+        // Should reach end point now
+        speed = 0;
+      } else {
+        // Continue deaccelerating
+        speed = easing.easeOutCirc(changeDiff, rotateSpeed, -rotateSpeed, deaccTime);
       }
-      speed = easing.easeOutCirc(changeDiff, rotateSpeed, -rotateSpeed, 5000);
-      console.log('Deaccelerating with ' + speed);
+      // console.log('Deaccelerating with ' + speed);
     }
 
     // Rotate
@@ -231,7 +244,7 @@
     } else {
       nonreadyBuffers++;
       if(nonreadyBuffers < 5 || nonreadyBuffers % 20 === 0) {
-        console.log('nonreadyBuffers' + nonreadyBuffers);
+        // console.log('nonreadyBuffers' + nonreadyBuffers);
       }
       window.requestAnimationFrame(render);
     }
