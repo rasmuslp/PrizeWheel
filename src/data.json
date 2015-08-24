@@ -1,11 +1,24 @@
 var data = [
-  {
-    text: 'Winner!'
-  },
-  {
-    text: 'Looser!'
-  },
-  {
-    text: 'In between'
-  }
-  ];
+	'12:24',
+	'Kelø',
+	'Center-Sko',
+	'Netto',
+	'Brugen',
+	'Sports Master',
+	'Nr. 17',
+	'Guldbageren',
+	'Bog & Ide',
+	'Maribo Cykler',
+	'Larsson Cykler',
+	'12:24',
+	'Kelø',
+	'Center-Sko',
+	'Netto',
+	'Brugen',
+	'Sports Master',
+	'Nr. 17',
+	'Guldbageren',
+	'Bog & Ide',
+	'Maribo Cykler',
+	'Larsson Cykler'
+	];
